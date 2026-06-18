@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: auto; }
+        .nb-footer { 
+            position: fixed; bottom: 5px; right: 5px; 
+            font-size: 9px; font-family: sans-serif; 
+            color: rgba(150,150,150,0.5); text-decoration: none; z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+<div id="render-target"></div>
+<a href="https://sites.google.com/view/niche-block-3" class="nb-footer" target="_blank">Code optimized by Niche-Block</a>
+
+<script>
+    // --- EXACT PATHS & SUB-PAGES WHITELIST ---
+    const allowedPrefixes = [
+        "https://sites.google.com/view/niche-block-5",
+        "https://sites.google.com/view/voltorium",
+        "https://sites.google.com/cpsd.us/infinite"
+    ];
+
+    let isAuthorized = false;
+
+    // Read the parent page URL via document.referrer
+    if (document.referrer) {
+        // Strip out any query strings (like ?authuser=0) for clean matching
+        const cleanReferrer = document.referrer.split('?')[0];
+        
+        // Check if the actual loading page starts with your approved paths
+        isAuthorized = allowedPrefixes.some(prefix => cleanReferrer.startsWith(prefix));
+    }
+
+    // If it fails the check, block it immediately
+    if (!isAuthorized) {
+        document.getElementById('render-target').innerHTML = 
+            "<div style='color:red; font-family:sans-serif; font-weight:bold; text-align:center; margin-top:50px;'>Unauthorized Copy</div>";
+        window.stop(); 
+        throw new Error("Execution blocked: Unauthorized copy.");
+    }
+
+    // Fetch your 2.9 MB file only if the domain and path match perfectly
+    fetch("https://raw.githubusercontent.com/nicheblock/niche-arcade/refs/heads/main/html")
+        .then(res => res.text())
+        .then(code => {
+            const container = document.getElementById('render-target');
+            container.innerHTML = code;
+            const scripts = Array.from(container.querySelectorAll("script"));
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement("script");
+                Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+        })
+        .catch(err => console.error("Error loading code:", err));
+</script>
+</body>
+</html>
